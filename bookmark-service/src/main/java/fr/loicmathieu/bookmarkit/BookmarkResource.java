@@ -1,11 +1,11 @@
 package fr.loicmathieu.bookmarkit;
 
-import javax.ws.rs.Consumes;
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
+import javax.transaction.Transactional;
+import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import java.awt.print.Book;
+import java.net.URI;
 import java.util.List;
 
 @Path("/bookmarks")
@@ -13,23 +13,40 @@ import java.util.List;
 @Consumes(MediaType.APPLICATION_JSON)
 public class BookmarkResource {
 
+    @GET
     public List<Bookmark> listAll(){
-        throw new UnsupportedOperationException("not yet implemented");
+        return Bookmark.listAll();
     }
 
-    public Bookmark get(Long id) {
-        throw new UnsupportedOperationException("not yet implemented");
+    @GET
+    @Path("/{id}")
+    public Bookmark get(@PathParam("id") Long id) {
+        return Bookmark.findById(id);
     }
 
+    @POST
+    @Transactional
     public Response create(Bookmark bookmark){
-        throw new UnsupportedOperationException("not yet implemented");
+        bookmark.persist();
+        return Response.created(URI.create("/bookmarks/" + bookmark.id)).build();
     }
 
+    @PUT
+    @Path("/{id}")
+    @Transactional
     public void update(Bookmark bookmark){
-        throw new UnsupportedOperationException("not yet implemented");
+        Bookmark toUpdate = Bookmark.findById(bookmark.id);
+        toUpdate.title = bookmark.title;
+        toUpdate.description = bookmark.description;
+        toUpdate.url = bookmark.url;
+        toUpdate.location = bookmark.location;
+        toUpdate.persist();
     }
 
-    public void delete(Long id){
-        throw new UnsupportedOperationException("not yet implemented");
+    @DELETE
+    @Path("/{id}")
+    @Transactional
+    public void delete(@PathParam("id") Long id){
+        Bookmark.findById(id).delete();
     }
 }
